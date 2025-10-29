@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Movimento JavaScript</title>
+    <style>
+        /* O contêiner define a área de movimento */
+        #container {
+            width: 90%;
+            height: 400px;
+            border: 2px solid #333; /* Apenas para visualização */
+            position: relative; /* ESSENCIAL: Serve como referência para o movimento */
+            margin: 20px auto;
+        }
+
+        /* O elemento a ser movido */
+        #minhaImagem {
+            width: 50px;
+            height: 50px;
+            background-color: #007bff;
+            border-radius: 8px;
+            /* ESSENCIAL: Permite o controle de 'left' e 'top' pelo JS */
+            position: absolute; 
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="container">
+        <div id="minhaImagem"></div>
+    </div>
+
+    <script src="script.js"></script> 
+    </body>
+</html>
