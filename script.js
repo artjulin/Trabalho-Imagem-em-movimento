@@ -1,17 +1,48 @@
-// O CÓDIGO DE MOVIMENTO EM JAVASCRIPT (Versão para tela cheia):
+<script>
+    // O CÓDIGO JAVASCRIPT REESTRUTURADO PARA MULTIPLOS ELEMENTOS
 
-let e = document.getElementById('minhaImagem'); // 1. Seleciona a imagem.
-// Iniciamos a posição em 0, 0 e definimos uma velocidade menor para que o efeito seja sutil.
-let x = 0, y = 0, dx = 0.5, dy = 0.5; // 2. Coordenadas iniciais e velocidade (ajustada para um movimento lento).
+    // A função principal que gerencia o movimento de um único elemento.
+    function iniciarMovimento(elemento, velocidadeX, velocidadeY) {
+        // Inicializa as coordenadas baseadas na posição atual no HTML
+        let x = elemento.offsetLeft; 
+        let y = elemento.offsetTop;
+        let dx = velocidadeX;
+        let dy = velocidadeY;
 
-setInterval(() => { // 3. Inicia o loop de animação a cada 30ms.
-    x += dx; y += dy; // 4. Atualiza as coordenadas.
-    
-    // 5. Verifica colisão horizontal e inverte a direção (dx) se necessário.
-    // Usamos window.innerWidth e window.innerHeight para a tela inteira.
-    if (x + e.offsetWidth > window.innerWidth || x < 0) dx *= -1; 
-    
-    // 6. Verifica colisão vertical e aplica as novas posições.
-    if (y + e.offsetHeight > window.innerHeight || y < 0) dy *= -1; 
-    e.style.left = x + 'px'; e.style.top = y + 'px'; 
-}, 30);
+        // O loop que fará o movimento para este elemento específico
+        setInterval(() => {
+            x += dx; y += dy; 
+
+            // Lógica de Colisão (Horizontal)
+            if (x + elemento.offsetWidth > window.innerWidth || x < 0) {
+                dx *= -1; // Inverte direção X
+            }
+
+            // Lógica de Colisão (Vertical)
+            if (y + elemento.offsetHeight > window.innerHeight || y < 0) {
+                dy *= -1; // Inverte direção Y
+            }
+
+            // Aplica as novas posições
+            elemento.style.left = x + 'px';
+            elemento.style.top = y + 'px'; 
+
+        }, 20); // Intervalo reduzido para 20ms para um movimento ligeiramente mais suave
+    }
+
+    // 1. Seleciona TODOS os elementos com a classe "imagem-movel"
+    const imagens = document.querySelectorAll('.imagem-movel'); 
+
+    // 2. Aplica a lógica de movimento para cada elemento
+    imagens.forEach((img, index) => {
+        // *** ALTERAÇÃO AQUI: Aumentando o multiplicador de 0.5 para 1.5 ***
+        // Isso aumenta a velocidade base de cada imagem.
+        const VELOCIDADE_BASE = 1.5; 
+        
+        const velocidadeX = (index + 1) * VELOCIDADE_BASE; 
+        const velocidadeY = (index + 1) * (VELOCIDADE_BASE - 0.5); // Garante que Y seja um pouco diferente de X
+        
+        iniciarMovimento(img, velocidadeX, velocidadeY);
+    });
+
+</script>
