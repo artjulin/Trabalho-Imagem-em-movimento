@@ -1,64 +1,122 @@
 <script>
-    // FATOR DE AJUSTE: Garante que a imagem seja empurrada 1 pixel para dentro ao colidir
-    const AJUSTE_COLISAO = 1; 
+    // Fator de ajuste para evitar que os objetos fiquem presos após a colisão
+    const AJUSTE_COLISAO = 2; 
 
-    // A função principal que gerencia o movimento de um único elemento.
-    function iniciarMovimento(elemento, velocidadeX, velocidadeY) {
-        let x = elemento.offsetLeft; 
-        let y = elemento.offsetTop;
-        let dx = velocidadeX;
-        let dy = velocidadeY;
+    // Classe (Molde) para cada objeto móvel
+    class ObjetoMovel {
+        constructor(elemento, velocidadeX, velocidadeY) {
+            this.elemento = elemento;
+            this.x = elemento.offsetLeft;
+            this.y = elemento.offsetTop;
+            this.dx = velocidadeX;
+            this.dy = velocidadeY;
+            this.raio = elemento.offsetWidth / 2; // Para facilitar a colisão circular
+        }
 
-        // O loop que fará o movimento para este elemento específico
-        setInterval(() => {
-            x += dx; y += dy; 
-            
-            const larguraElemento = elemento.offsetWidth;
-            const alturaElemento = elemento.offsetHeight;
+        // Move o objeto baseado em sua velocidade (dx, dy)
+        mover() {
+            this.x += this.dx;
+            this.y += this.dy;
+        }
+
+        // Aplica a nova posição ao estilo CSS
+        renderizar() {
+            this.elemento.style.left = this.x + 'px';
+            this.elemento.style.top = this.y + 'px';
+        }
+
+        // Lógica de colisão com as bordas da tela (já existente)
+        checarColisaoBorda() {
             const larguraTela = window.innerWidth;
             const alturaTela = window.innerHeight;
+            const largura = this.elemento.offsetWidth;
+            const altura = this.elemento.offsetHeight;
 
-            // 1. Lógica de Colisão Horizontal
-            if (x + larguraElemento >= larguraTela) { 
-                // Colidiu na Borda Direita: Inverte e empurra para a esquerda
-                dx *= -1;
-                x = larguraTela - larguraElemento - AJUSTE_COLISAO; 
-            } else if (x <= 0) { 
-                // Colidiu na Borda Esquerda: Inverte e empurra para a direita
-                dx *= -1;
-                x = AJUSTE_COLISAO; 
+            // Colisão Horizontal
+            if (this.x + largura >= larguraTela) { 
+                this.dx *= -1;
+                this.x = larguraTela - largura - AJUSTE_COLISAO;
+            } else if (this.x <= 0) { 
+                this.dx *= -1;
+                this.x = AJUSTE_COLISAO;
             }
 
-            // 2. Lógica de Colisão Vertical
-            if (y + alturaElemento >= alturaTela) { 
-                // Colidiu na Borda Inferior: Inverte e empurra para cima
-                dy *= -1;
-                y = alturaTela - alturaElemento - AJUSTE_COLISAO; 
-            } else if (y <= 0) { 
-                // Colidiu na Borda Superior: Inverte e empurra para baixo
-                dy *= -1;
-                y = AJUSTE_COLISAO; 
+            // Colisão Vertical
+            if (this.y + altura >= alturaTela) { 
+                this.dy *= -1;
+                this.y = alturaTela - altura - AJUSTE_COLISAO;
+            } else if (this.y <= 0) { 
+                this.dy *= -1;
+                this.y = AJUSTE_COLISAO;
             }
-
-            // Aplica as novas posições
-            elemento.style.left = x + 'px';
-            elemento.style.top = y + 'px'; 
-
-        }, 20); // Mantendo o intervalo de 20ms para um movimento suave e rápido
+        }
     }
 
-    // 1. Seleciona TODOS os elementos com a classe "imagem-movel"
-    const imagens = document.querySelectorAll('.imagem-movel'); 
 
-    // 2. Aplica a lógica de movimento para cada elemento
-    imagens.forEach((img, index) => {
-        // Velocidade alta para que a "batida" seja visível
-        const VELOCIDADE_BASE = 1.5; 
+    // --- FUNÇÕES DE COLISÃO PRINCIPAIS ---
+
+    // 1. Detecta se dois elementos estão se sobrepondo (colidindo)
+    function estaoColidindo(obj1, obj2) {
+        // Usa o Teorema de Pitágoras para calcular a distância entre os centros (a forma mais precisa)
+        const distanciaX = obj1.x + obj1.raio - (obj2.x + obj2.raio);
+        const distanciaY = obj1.y + obj1.raio - (obj2.y + obj2.raio);
+        const distanciaTotal = Math.sqrt(distanciaX * distanciaX + distanciaY * distanciaY);
         
-        const velocidadeX = (index + 1) * VELOCIDADE_BASE; 
-        const velocidadeY = (index + 1) * (VELOCIDADE_BASE - 0.5); 
-        
-        iniciarMovimento(img, velocidadeX, velocidadeY);
+        // Colisão ocorre se a distância entre os centros for menor que a soma dos raios (metade da largura)
+        return distanciaTotal < (obj1.raio + obj2.raio);
+    }
+
+    // 2. Resolve a colisão: inverte as velocidades (faz eles "baterem e voltarem")
+    function resolverColisao(obj1, obj2) {
+        // Troca as velocidades (direções) entre os dois objetos
+        [obj1.dx, obj2.dx] = [obj2.dx, obj1.dx];
+        [obj1.dy, obj2.dy] = [obj2.dy, obj1.dy];
+    }
+
+
+    // --- INICIALIZAÇÃO DO JOGO ---
+
+    const elementosHTML = document.querySelectorAll('.imagem-movel'); 
+    const objetosMoveis = [];
+    const VELOCIDADE_BASE = 1.8; // Velocidade alta para que as colisões sejam visíveis
+
+    // Cria objetos ObjetoMovel para cada imagem na tela
+    elementosHTML.forEach((el, index) => {
+        const velocidadeX = (index % 2 === 0 ? 1 : -1) * VELOCIDADE_BASE; // Alterna entre direções inicial
+        const velocidadeY = (index % 3 === 0 ? 1 : -1) * (VELOCIDADE_BASE - 0.4); 
+        objetosMoveis.push(new ObjetoMovel(el, velocidadeX, velocidadeY));
     });
+
+    // Função de loop principal (game loop)
+    function loopPrincipal() {
+        // 1. Move todos os objetos e checa colisão de borda
+        objetosMoveis.forEach(obj => {
+            obj.mover();
+            obj.checarColisaoBorda();
+        });
+
+        // 2. Checa colisão entre TODOS os pares de objetos
+        for (let i = 0; i < objetosMoveis.length; i++) {
+            for (let j = i + 1; j < objetosMoveis.length; j++) {
+                const obj1 = objetosMoveis[i];
+                const obj2 = objetosMoveis[j];
+
+                if (estaoColidindo(obj1, obj2)) {
+                    resolverColisao(obj1, obj2);
+                }
+            }
+        }
+
+        // 3. Renderiza a posição final de todos os objetos
+        objetosMoveis.forEach(obj => {
+            obj.renderizar();
+        });
+
+        // Usa requestAnimationFrame para um loop de animação mais suave e eficiente
+        requestAnimationFrame(loopPrincipal);
+    }
+
+    // Inicia o loop de animação!
+    requestAnimationFrame(loopPrincipal);
 
 </script>
