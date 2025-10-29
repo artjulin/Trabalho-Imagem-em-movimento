@@ -2,39 +2,63 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Movimento de Imagem Fullscreen</title>
+    <title>Movimento de Imagem Menor na Tela</title>
     <style>
-        /* Remove margens e garante que o corpo preencha a tela */
+        /* CSS para garantir que a tela seja o contêiner de movimento */
         body {
             margin: 0;
             padding: 0;
-            overflow: hidden; /* Evita barras de rolagem ao mover */
+            overflow: hidden; /* Evita barras de rolagem */
             width: 100vw;
             height: 100vh;
-            position: relative; /* O contêiner de movimento é a própria tela (body) */
+            position: relative; 
+            background-color: #111; /* Cor de fundo escura para contraste */
         }
 
-        /* O elemento da imagem */
+        /* *** ALTERAÇÃO AQUI: Diminuindo a imagem para um tamanho fixo. ***
+           A imagem terá 300px de largura e 300px de altura.
+        */
         #minhaImagem {
-            /* ESSENCIAL para o JS mover */
+            /* ESSENCIAL: Permite que o JS manipule a posição */
             position: absolute; 
             top: 0;
             left: 0;
             
-            /* Garante que a imagem preencha a tela inteira */
-            width: 100vw;
-            height: 100vh;
+            width: 300px;  /* Largura da imagem */
+            height: 300px; /* Altura da imagem */
             
-            /* Ajusta como a imagem se encaixa. 'cover' a estica para cobrir tudo. */
+            /* Garante que a imagem se encaixe bem nas dimensões acima */
             object-fit: cover; 
+            border: 5px solid magenta; /* Adicionei uma borda para visualização */
         }
     </style>
 </head>
 <body>
 
-    <img id="minhaImagem" src="sae.jpeg" alt="Imagem do Sae Itoshi" class="imagem-full">
+    <img id="minhaImagem" src="sae.jpeg" alt="Sae Itoshi em Movimento">
 
-    <script src="script.js"></script> 
+    <script>
+        // O CÓDIGO JAVASCRIPT CONDENSADO PARA O MOVIMENTO
+        
+        // 1. Seleciona a imagem.
+        const e = document.getElementById('minhaImagem'); 
+        
+        if (e) {
+            // 2. Coordenadas iniciais e velocidade (movimento lento).
+            let x = 0, y = 0, dx = 1.5, dy = 1.5; // Velocidade ajustada para 1.5 pixels/frame
+
+            setInterval(() => { // 3. Inicia o loop a cada 30ms.
+                x += dx; y += dy; // 4. Atualiza as coordenadas.
+                
+                // 5. Verifica colisão horizontal. Limite é a largura total da janela (window.innerWidth).
+                if (x + e.offsetWidth > window.innerWidth || x < 0) dx *= -1; 
+                
+                // 6. Verifica colisão vertical e aplica as novas posições. Limite é a altura total da janela.
+                if (y + e.offsetHeight > window.innerHeight || y < 0) dy *= -1; 
+                e.style.left = x + 'px'; e.style.top = y + 'px'; 
+            }, 30);
+        }
+    </script> 
 
 </body>
 </html>
