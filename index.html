@@ -2,62 +2,79 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Movimento de Imagem Menor na Tela</title>
+    <title>Múltiplas Imagens em Movimento</title>
     <style>
         /* CSS para garantir que a tela seja o contêiner de movimento */
         body {
             margin: 0;
             padding: 0;
-            overflow: hidden; /* Evita barras de rolagem */
+            overflow: hidden; 
             width: 100vw;
             height: 100vh;
             position: relative; 
-            background-color: #111; /* Cor de fundo escura para contraste */
+            background-color: #111; /* Fundo escuro */
         }
 
-        /* *** ALTERAÇÃO AQUI: Diminuindo a imagem para um tamanho fixo. ***
-           A imagem terá 300px de largura e 300px de altura.
-        */
-        #minhaImagem {
-            /* ESSENCIAL: Permite que o JS manipule a posição */
-            position: absolute; 
-            top: 0;
-            left: 0;
-            
-            width: 300px;  /* Largura da imagem */
-            height: 300px; /* Altura da imagem */
-            
-            /* Garante que a imagem se encaixe bem nas dimensões acima */
+        /* *** ATENÇÃO: Usando CLASSE para estilizar todos os elementos. *** */
+        .imagem-movel {
+            position: absolute; /* ESSENCIAL para o movimento */
+            width: 250px;       /* Tamanho das imagens */
+            height: 250px;
             object-fit: cover; 
-            border: 5px solid magenta; /* Adicionei uma borda para visualização */
+            border: 3px solid magenta; 
         }
     </style>
 </head>
 <body>
 
-    <img id="minhaImagem" src="saeitoshi.jpeg" alt="Sae Itoshi em Movimento">
-
+    <img class="imagem-movel" src="sae.jpeg" style="top: 50px; left: 50px;" alt="Sae 1">
+    <img class="imagem-movel" src="sae.jpeg" style="top: 300px; left: 150px;" alt="Sae 2">
+    <img class="imagem-movel" src="sae.jpeg" style="top: 100px; left: 700px;" alt="Sae 3">
     <script>
-        // O CÓDIGO JAVASCRIPT CONDENSADO PARA O MOVIMENTO
-        
-        // 1. Seleciona a imagem.
-        const e = document.getElementById('minhaImagem'); 
-        
-        if (e) {
-            // 2. Coordenadas iniciais e velocidade (movimento lento).
-            let x = 0, y = 0, dx = 1.5, dy = 1.5; // Velocidade ajustada para 1.5 pixels/frame
+        // O CÓDIGO JAVASCRIPT REESTRUTURADO PARA MULTIPLOS ELEMENTOS
 
-            setInterval(() => { // 3. Inicia o loop a cada 30ms.
-                x += dx; y += dy; // 4. Atualiza as coordenadas.
-                
-                // 5. Verifica colisão horizontal. Limite é a largura total da janela (window.innerWidth).
-                if (x + e.offsetWidth > window.innerWidth || x < 0) dx *= -1; 
-                
-                // 6. Verifica colisão vertical e aplica as novas posições. Limite é a altura total da janela.
-                if (y + e.offsetHeight > window.innerHeight || y < 0) dy *= -1; 
-                e.style.left = x + 'px'; e.style.top = y + 'px'; 
-            }, 30);
+        // 1. Funções de Movimento e Colisão
+        function iniciarMovimento(elemento, velocidadeX, velocidadeY) {
+            // Inicializa as coordenadas baseadas na posição atual no HTML
+            let x = elemento.offsetLeft; 
+            let y = elemento.offsetTop;
+            let dx = velocidadeX;
+            let dy = velocidadeY;
+
+            // O loop que fará o movimento para este elemento específico
+            setInterval(() => {
+                x += dx; y += dy; 
+
+                // Lógica de Colisão (Horizontal)
+                if (x + elemento.offsetWidth > window.innerWidth || x < 0) {
+                    dx *= -1; // Inverte direção X
+                }
+
+                // Lógica de Colisão (Vertical)
+                if (y + elemento.offsetHeight > window.innerHeight || y < 0) {
+                    dy *= -1; // Inverte direção Y
+                }
+
+                // Aplica as novas posições
+                elemento.style.left = x + 'px';
+                elemento.style.top = y + 'px'; 
+
+            }, 30); // Intervalo de 30ms para animação suave
         }
+
+        // 2. Seleciona TODOS os elementos com a classe "imagem-movel"
+        const imagens = document.querySelectorAll('.imagem-movel'); 
+
+        // 3. Aplica a lógica de movimento para cada elemento
+        imagens.forEach((img, index) => {
+            // Define velocidades diferentes para cada imagem para um movimento único
+            // Velocidade X (dx) é index + 1, garantindo que todas sejam diferentes
+            const velocidadeX = (index + 1) * 0.5; 
+            const velocidadeY = (index + 1) * 0.4;
+            
+            iniciarMovimento(img, velocidadeX, velocidadeY);
+        });
+
     </script> 
 
 </body>
